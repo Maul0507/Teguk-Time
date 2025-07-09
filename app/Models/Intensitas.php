@@ -9,12 +9,16 @@ class Intensitas extends Model
 {
     use HasFactory;
 
+    protected $table = 'intensitas';
+
     protected $fillable = [
         'user_id',
-        'gender',
-        'age',
-        'weight_kg',
-        'height_cm',
-        'activity_level',
+        'jenis_kelamin',
+        'umur',
+        'berat_badan',
+        'tinggi_badan',
+        'aktivitas',
+        'target_air',
+        'tanggal',
     ];
 }

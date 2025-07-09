@@ -14,6 +14,8 @@ Route::post('/auth/login', [AuthController::class, 'login']);
 
 // 🔐 Route yang membutuhkan autentikasi sanctum
 Route::middleware('auth:sanctum')->group(function () {
+    Route::put('/users/{id}', [AuthController::class, 'update']); // update nama user
+
 
     // 📰 Article routes
     Route::get('/articles', [ArticlesController::class, 'index']);
@@ -23,6 +25,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::delete('/articles/{id}', [ArticlesController::class, 'destroy']);
 
     // 📊 Intensitas routes
+    Route::apiResource('intensitas', IntensitasController::class);
     Route::get('/intensitas', [IntensitasController::class, 'index']);
     Route::get('/intensitas/{id}', [IntensitasController::class, 'show']);
     Route::post('/intensitas', [IntensitasController::class, 'store']);
@@ -35,4 +38,5 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/drink-schedules', [DrinkScheduleController::class, 'store']);
     Route::put('/drink-schedules/{id}', [DrinkScheduleController::class, 'update']);
     Route::delete('/drink-schedules/{id}', [DrinkScheduleController::class, 'destroy']);
+    
 });

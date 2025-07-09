@@ -10,26 +10,24 @@ use Illuminate\Support\Facades\Validator;
 
 class IntensitasController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
+    // GET semua data
     public function index()
     {
         return response()->json(Intensitas::all());
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
+    // POST data baru
     public function store(Request $request)
 {
     $validator = Validator::make($request->all(), [
         'user_id' => 'required|integer',
-        'gender' => 'required|in:Laki-laki,Perempuan',
-        'age' => 'required|integer|min:0',
-        'weight_kg' => 'required|numeric|min:0',
-        'height_cm' => 'required|numeric|min:0',
-        'activity_level' => 'required|in:Ringan,Sedang,Berat',
+        'jenis_kelamin' => 'required|in:Laki-laki,Perempuan',
+        'umur' => 'required|integer|min:0',
+        'berat_badan' => 'required|numeric|min:0',
+        'tinggi_badan' => 'required|numeric|min:0',
+        'aktivitas' => 'required|in:Ringan,Sedang,Berat',
+        'target_air' => 'required|numeric|min:0',
+        'tanggal' => 'required|date',
     ]);
 
     if ($validator->fails()) {
@@ -46,9 +44,8 @@ class IntensitasController extends Controller
         'data' => $intensitas
     ], 201);
 }
-    /**
-     * Display the specified resource.
-     */
+
+    // GET detail by ID
     public function show(string $id)
     {
         try {
@@ -59,9 +56,7 @@ class IntensitasController extends Controller
         }
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
+    // PUT update
     public function update(Request $request, string $id)
     {
         try {
@@ -69,11 +64,13 @@ class IntensitasController extends Controller
 
             $validated = $request->validate([
                 'user_id' => 'sometimes|integer',
-                'gender' => 'sometimes|in:Laki-laki,Perempuan',
-                'age' => 'sometimes|integer|min:0',
-                'weight_kg' => 'sometimes|numeric|min:0',
-                'height_cm' => 'sometimes|numeric|min:0',
-                'activity_level' => 'sometimes|in:Ringan,Sedang,Berat',
+                'jenis_kelamin' => 'sometimes|in:Laki-laki,Perempuan',
+                'umur' => 'sometimes|integer|min:0',
+                'berat_badan' => 'sometimes|numeric|min:0',
+                'tinggi_badan' => 'sometimes|numeric|min:0',
+                'aktivitas' => 'sometimes|in:Ringan,Sedang,Berat',
+                'target_air' => 'sometimes|numeric|min:0',
+                'tanggal' => 'sometimes|date',
             ]);
 
             $intensitas->update($validated);
@@ -87,9 +84,7 @@ class IntensitasController extends Controller
         }
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
+    // DELETE
     public function destroy(string $id)
     {
         try {
