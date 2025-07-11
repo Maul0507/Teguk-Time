@@ -23,7 +23,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/articles', [ArticlesController::class, 'store']);
     Route::put('/articles/{id}', [ArticlesController::class, 'update']);
     Route::delete('/articles/{id}', [ArticlesController::class, 'destroy']);
-
+   
     // 📊 Intensitas routes
     Route::apiResource('intensitas', IntensitasController::class);
     Route::get('/intensitas', [IntensitasController::class, 'index']);
@@ -31,7 +31,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/intensitas', [IntensitasController::class, 'store']);
     Route::put('/intensitas/{id}', [IntensitasController::class, 'update']);
     Route::delete('/intensitas/{id}', [IntensitasController::class, 'destroy']);
-
+    Route::get('/intensitas/user/{id}/hari-ini', [IntensitasController::class, 'getHariIni']);
+   
     // 💧 Drink Schedules routes
     Route::get('/drink-schedules', [DrinkScheduleController::class, 'index']);
     Route::get('/drink-schedules/{id}', [DrinkScheduleController::class, 'show']);

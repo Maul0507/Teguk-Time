@@ -5,95 +5,91 @@ namespace App\Http\Controllers\ApiController;
 use App\Http\Controllers\Controller;
 use App\Models\Intensitas;
 use Illuminate\Http\Request;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Facades\Validator;
+use Carbon\Carbon;
 
 class IntensitasController extends Controller
 {
-    // GET semua data
     public function index()
     {
         return response()->json(Intensitas::all());
     }
 
-    // POST data baru
-    public function store(Request $request)
-{
-    $validator = Validator::make($request->all(), [
-        'user_id' => 'required|integer',
-        'jenis_kelamin' => 'required|in:Laki-laki,Perempuan',
-        'umur' => 'required|integer|min:0',
-        'berat_badan' => 'required|numeric|min:0',
-        'tinggi_badan' => 'required|numeric|min:0',
-        'aktivitas' => 'required|in:Ringan,Sedang,Berat',
-        'target_air' => 'required|numeric|min:0',
-        'tanggal' => 'required|date',
-    ]);
-
-    if ($validator->fails()) {
-        return response()->json([
-            'message' => 'Validasi gagal',
-            'errors' => $validator->errors()
-        ], 422);
-    }
-
-    $intensitas = Intensitas::create($validator->validated());
-
-    return response()->json([
-        'message' => 'Data intensitas berhasil ditambahkan',
-        'data' => $intensitas
-    ], 201);
-}
-
-    // GET detail by ID
     public function show(string $id)
     {
-        try {
-            $data = Intensitas::findOrFail($id);
-            return response()->json($data);
-        } catch (ModelNotFoundException $e) {
+        $data = Intensitas::find($id);
+        if (!$data) {
             return response()->json(['message' => 'Data tidak ditemukan'], 404);
         }
+
+        return response()->json($data);
     }
 
-    // PUT update
-    public function update(Request $request, string $id)
+    public function store(Request $request)
     {
-        try {
-            $intensitas = Intensitas::findOrFail($id);
+        $validator = Validator::make($request->all(), [
+            'user_id' => 'required|integer',
+            'jenis_kelamin' => 'required|in:Laki-laki,Perempuan',
+            'umur' => 'required|integer|min:0',
+            'berat_badan' => 'required|numeric|min:0',
+            'tinggi_badan' => 'required|numeric|min:0',
+            'aktivitas' => 'required|in:Ringan,Sedang,Berat',
+            'target_air' => 'required|numeric|min:0',
+        ]);
 
-            $validated = $request->validate([
-                'user_id' => 'sometimes|integer',
-                'jenis_kelamin' => 'sometimes|in:Laki-laki,Perempuan',
-                'umur' => 'sometimes|integer|min:0',
-                'berat_badan' => 'sometimes|numeric|min:0',
-                'tinggi_badan' => 'sometimes|numeric|min:0',
-                'aktivitas' => 'sometimes|in:Ringan,Sedang,Berat',
-                'target_air' => 'sometimes|numeric|min:0',
-                'tanggal' => 'sometimes|date',
-            ]);
-
-            $intensitas->update($validated);
-
+        if ($validator->fails()) {
             return response()->json([
-                'message' => 'Data intensitas berhasil diperbarui',
-                'data' => $intensitas
-            ]);
-        } catch (ModelNotFoundException $e) {
-            return response()->json(['message' => 'Data tidak ditemukan'], 404);
+                'message' => 'Validasi gagal',
+                'errors' => $validator->errors()
+            ], 422);
         }
+
+        // Cek apakah user sudah mengisi hari ini
+        $today = Carbon::today()->toDateString();
+        $existing = Intensitas::where('user_id', $request->user_id)
+            ->whereDate('tanggal', $today)
+            ->first();
+
+        if ($existing) {
+            return response()->json([
+                'message' => 'Anda sudah mengisi intensitas hari ini.',
+                'data' => $existing
+            ], 409); // Conflict
+        }
+
+        $data = $validator->validated();
+        $data['tanggal'] = $today;
+
+        $intensitas = Intensitas::create($data);
+
+        return response()->json([
+            'message' => 'Data intensitas berhasil ditambahkan',
+            'data' => $intensitas
+        ], 201);
     }
 
-    // DELETE
     public function destroy(string $id)
     {
-        try {
-            $intensitas = Intensitas::findOrFail($id);
-            $intensitas->delete();
-
-            return response()->json(['message' => 'Data intensitas berhasil dihapus']);
-        } catch (ModelNotFoundException $e) {
+        $data = Intensitas::find($id);
+        if (!$data) {
             return response()->json(['message' => 'Data tidak ditemukan'], 404);
         }
+
+        $data->delete();
+        return response()->json(['message' => 'Data intensitas berhasil dihapus']);
+    }
+
+    public function getHariIni($id)
+    {
+        $today = Carbon::today()->toDateString();
+        $data = Intensitas::where('user_id', $id)
+            ->whereDate('tanggal', $today)
+            ->first();
+
+        if ($data) {
+            return response()->json($data);
+        }
+
+        return response()->json(['message' => 'Belum ada input intensitas hari ini'], 404);
     }
 }
